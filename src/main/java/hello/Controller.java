@@ -15,6 +15,8 @@ public class Controller {
     //String registerUrl= "https://openmrs-cng-staging.homefry.tk/openmrs/ws/rest/v1/patient";
     private String fetchUrl;
     private String registerUrl;
+    private String username;
+    private String password;
     static RestTemplate restTemplate = new RestTemplate();
 
     public Controller() {
@@ -32,6 +34,9 @@ public class Controller {
                 System.getenv("MOBILE_USERNAME") + "&password=" + System.getenv("MOBILE_PASSWORD");
 
         registerUrl = System.getenv("REGISTER_URL");
+
+        username = System.getenv("MOBILE_USERNAME");
+        password = System.getenv("MOBILE_PASSWORD");
     }
     
     @GetMapping("/fetch")
@@ -59,9 +64,9 @@ public class Controller {
         return true;  
     }
 
-    public static JsonArray getDuplicates(String name)
+    private JsonArray getDuplicates(String name)
     {
-    String fetchUrl2 = "https://openmrs-cng-staging.homefry.tk/openmrs/ws/rest/v1/patient?v=default&q="+name;
+    String fetchUrl2 = registerUrl + "?v=default&q="+name;
     HttpHeaders headers=getHeaders();
     HttpEntity<String> request = new HttpEntity<String>(headers);
     ResponseEntity<String> response = restTemplate.exchange(fetchUrl2, HttpMethod.GET, request, String.class);
@@ -74,9 +79,9 @@ public class Controller {
     return resultArray;
     }
     
-    public static HttpHeaders getHeaders()
+    private HttpHeaders getHeaders()
     {
-    String plainCreds = "admin:Admin123";
+    String plainCreds = username + ":" + password;
     String plainString 
             = Base64.getEncoder() 
                   .encodeToString(plainCreds.getBytes());
