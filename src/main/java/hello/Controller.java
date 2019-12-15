@@ -9,10 +9,30 @@ import org.springframework.http.*;
 @RestController
 public class Controller {
 
-    public static JsonParser prsr = new JsonParser();
-    final static String fetchUrl = "https://openmrs-cng-staging.homefry.tk/openmrs/module/idgen/generateIdentifier.form?source=1&username=admin&password=Admin123";
-    final static String registerUrl= "https://openmrs-cng-staging.homefry.tk/openmrs/ws/rest/v1/patient";
-    static RestTemplate restTemplate = new RestTemplate(); 
+    private static JsonParser prsr = new JsonParser();
+    final private static String[] RequiredEnv = {"FETCH_URL", "REGISTER_URL", "MOBILE_USERNAME", "MOBILE_PASSWORD"};
+    //String fetchUrl = "https://openmrs-cng-staging.homefry.tk/openmrs/module/idgen/generateIdentifier.form?source=1&username=admin&password=Admin123";
+    //String registerUrl= "https://openmrs-cng-staging.homefry.tk/openmrs/ws/rest/v1/patient";
+    private String fetchUrl;
+    private String registerUrl;
+    static RestTemplate restTemplate = new RestTemplate();
+
+    public Controller() {
+        Map<String, String> systemEnv = System.getenv();
+
+        // Check that we have what we need & fail fast
+        for(String requiredVar : RequiredEnv) {
+            if(!systemEnv.containsKey(requiredVar)){
+                throw new NullPointerException("Could not find required environment variable: " + requiredVar);
+            }
+        }
+
+        // Build URLs from env
+        fetchUrl = System.getenv("FETCH_URL") + "?source=1&username=" +
+                System.getenv("MOBILE_USERNAME") + "&password=" + System.getenv("MOBILE_PASSWORD");
+
+        registerUrl = System.getenv("REGISTER_URL");
+    }
     
     @GetMapping("/fetch")
     public String fetchUuid() {
